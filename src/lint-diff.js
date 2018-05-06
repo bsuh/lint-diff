@@ -66,9 +66,37 @@ const filterLinterMessages = changedFileLineMap => (linterOutput) => {
     return filterMessages(result)
   }
 
+  const fixCounts = (result) => {
+    let errorCount = 0
+    let warningCount = 0
+    let fixableErrorCount = 0
+    let fixableWarningCount = 0
+
+    result.messages.forEach((message) => {
+      if (message.fatal || message.severity === 2) {
+        // error
+        errorCount += 1
+        if (message.fix) {
+          fixableErrorCount += 1
+        }
+      } else {
+        // warning
+        warningCount += 1
+        if (message.fix) {
+          fixableWarningCount += 1
+        }
+      }
+    })
+
+    return Object.assign({}, result, {
+      errorCount, warningCount, fixableErrorCount, fixableWarningCount,
+    })
+  }
+
   return pipe(
     prop('results'),
     map(filterMessagesByFile),
+    map(fixCounts),
     objOf('results')
   )(linterOutput)
 }

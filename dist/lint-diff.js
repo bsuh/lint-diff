@@ -433,7 +433,34 @@ var filterLinterMessages = function filterLinterMessages(changedFileLineMap) {
       return filterMessages(result);
     };
 
-    return (0, _pipe3.default)((0, _prop3.default)('results'), (0, _map3.default)(filterMessagesByFile), (0, _objOf3.default)('results'))(linterOutput);
+    var fixCounts = function fixCounts(result) {
+      var errorCount = 0;
+      var warningCount = 0;
+      var fixableErrorCount = 0;
+      var fixableWarningCount = 0;
+
+      result.messages.forEach(function (message) {
+        if (message.fatal || message.severity === 2) {
+          // error
+          errorCount += 1;
+          if (message.fix) {
+            fixableErrorCount += 1;
+          }
+        } else {
+          // warning
+          warningCount += 1;
+          if (message.fix) {
+            fixableWarningCount += 1;
+          }
+        }
+      });
+
+      return Object.assign({}, result, {
+        errorCount: errorCount, warningCount: warningCount, fixableErrorCount: fixableErrorCount, fixableWarningCount: fixableWarningCount
+      });
+    };
+
+    return (0, _pipe3.default)((0, _prop3.default)('results'), (0, _map3.default)(filterMessagesByFile), (0, _map3.default)(fixCounts), (0, _objOf3.default)('results'))(linterOutput);
   };
 };
 
