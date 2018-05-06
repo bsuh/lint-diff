@@ -27,13 +27,14 @@ import {
 import { getChangedLinesFromDiff } from './lib/git'
 
 const linter = new CLIEngine()
-const formatter = linter.getFormatter()
+let formatter
+let extensions
 
 const getChangedFiles = pipeP(
   commitRange => exec('git', ['diff', commitRange, '--name-only', '--diff-filter=ACM']),
   prop('stdout'),
   split('\n'),
-  filter(endsWith('.js')),
+  filter(file => extensions.split(',').some(ext => endsWith(ext, file))),
   map(path.resolve)
 )
 
@@ -77,11 +78,11 @@ const applyLinter = changedFileLineMap => pipe(
   filterLinterMessages(changedFileLineMap)
 )(changedFileLineMap)
 
-const logResults = pipe(
+const logResults = results => pipe(
   prop('results'),
   formatter,
   console.log
-)
+)(results)
 
 const getErrorCountFromReport = pipe(
   prop('results'),
@@ -100,10 +101,15 @@ const reportResults = pipe(
   ])
 )
 
-const run = (commitRange = 'HEAD') => Promise.resolve(commitRange)
-  .then(getChangedFiles)
-  .map(getChangedFileLineMap(commitRange))
-  .then(applyLinter)
-  .then(reportResults)
+const run = (commitRange = 'HEAD', _extensions = '.js', _formatter) => {
+  formatter = linter.getFormatter(_formatter)
+  extensions = _extensions
+
+  return Promise.resolve(commitRange)
+    .then(getChangedFiles)
+    .map(getChangedFileLineMap(commitRange))
+    .then(applyLinter)
+    .then(reportResults)
+}
 
 export default run
