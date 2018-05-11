@@ -401,7 +401,7 @@ var formatter = void 0;
 var extensions = void 0;
 
 var getChangedFiles = (0, _pipeP3.default)(function (commitRange) {
-  return (0, _execa2.default)('git', ['diff', commitRange, '--name-only', '--diff-filter=ACM']);
+  return (0, _execa2.default)('git', ['diff', commitRange, '--name-only', '--diff-filter=ACMR']);
 }, (0, _prop3.default)('stdout'), (0, _split3.default)('\n'), (0, _filter3.default)(function (file) {
   return extensions.split(',').some(function (ext) {
     return (0, _endsWith3.default)(ext, file);

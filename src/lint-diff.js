@@ -31,7 +31,7 @@ let formatter
 let extensions
 
 const getChangedFiles = pipeP(
-  commitRange => exec('git', ['diff', commitRange, '--name-only', '--diff-filter=ACM']),
+  commitRange => exec('git', ['diff', commitRange, '--name-only', '--diff-filter=ACMR']),
   prop('stdout'),
   split('\n'),
   filter(file => extensions.split(',').some(ext => endsWith(ext, file))),
